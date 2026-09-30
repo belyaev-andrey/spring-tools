@@ -235,6 +235,15 @@ public class BootJavaConfig implements InitializingBean {
 		return Boolean.TRUE.equals(b);
 	}
 	
+	/**
+	 * Whether {@code feature} is on, i.e. not listed in {@code boot-java.disabled-features}. A client
+	 * that does not send the setting keeps every feature. Another Java tooling that provides the same
+	 * feature can turn Spring Tools' copy off.
+	 */
+	public boolean isFeatureEnabled(DisableableFeature feature) {
+		return !settings.getStringSet("boot-java", "disabled-features").contains(feature.getId());
+	}
+
 	public boolean isBeanStructureTreeEnabled() {
 		Boolean b = settings.getBoolean("boot-java", "java", "beans-structure-tree");
 		return Boolean.TRUE.equals(b);

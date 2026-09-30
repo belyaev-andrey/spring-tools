@@ -63,8 +63,8 @@ public class RewriteConfig {
 	}
 
 	@ConditionalOnBean(JdtRefactorings.class)
-	@Bean ConvertQueryToTextBlockCodeActionProvider convertQueryToTextBlockCodeActionProvider(JdtRefactorings jdtRefactorings) {
-		return new ConvertQueryToTextBlockCodeActionProvider(jdtRefactorings);
+	@Bean ConvertQueryToTextBlockCodeActionProvider convertQueryToTextBlockCodeActionProvider(JdtRefactorings jdtRefactorings, BootJavaConfig config) {
+		return new ConvertQueryToTextBlockCodeActionProvider(jdtRefactorings, config);
 	}
 
 }

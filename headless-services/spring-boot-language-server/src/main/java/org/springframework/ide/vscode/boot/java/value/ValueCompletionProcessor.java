@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2025 Pivotal, Inc.
+ * Copyright (c) 2017, 2026 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -58,11 +59,21 @@ public class ValueCompletionProcessor implements CompletionProvider {
 	private final SpringPropertyIndexProvider indexProvider;
 	private final ProjectBasedPropertyIndexProvider adHocIndexProvider;
 	private final JavaProjectFinder projectFinder;
+	private final BooleanSupplier propertyKeysEnabled;
 
 	public ValueCompletionProcessor(JavaProjectFinder projectFinder, SpringPropertyIndexProvider indexProvider, ProjectBasedPropertyIndexProvider adHocIndexProvider) {
+		this(projectFinder, indexProvider, adHocIndexProvider, () -> true);
+	}
+
+	/**
+	 * @param propertyKeysEnabled whether property keys are proposed; {@code classpath:} resources are proposed either way
+	 */
+	public ValueCompletionProcessor(JavaProjectFinder projectFinder, SpringPropertyIndexProvider indexProvider, ProjectBasedPropertyIndexProvider adHocIndexProvider,
+			BooleanSupplier propertyKeysEnabled) {
 		this.projectFinder = projectFinder;
 		this.indexProvider = indexProvider;
 		this.adHocIndexProvider = adHocIndexProvider;
+		this.propertyKeysEnabled = propertyKeysEnabled;
 	}
 
 	@Override
@@ -237,6 +248,10 @@ public class ValueCompletionProcessor implements CompletionProvider {
 	}
 
 	private List<Match<PropertyInfo>> findMatches(String prefix, IDocument doc) {
+		if (!propertyKeysEnabled.getAsBoolean()) {
+			return List.of();
+		}
+
 		FuzzyMap<PropertyInfo> index = indexProvider.getIndex(doc).getProperties();
 		List<Match<PropertyInfo>> matches = index.find(camelCaseToHyphens(prefix));
 

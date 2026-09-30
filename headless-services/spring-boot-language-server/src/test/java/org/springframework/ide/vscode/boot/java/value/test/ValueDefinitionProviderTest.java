@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 VMware, Inc.
+ * Copyright (c) 2023, 2026 VMware, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
 
 import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.Position;
@@ -253,5 +254,29 @@ public class ValueDefinitionProviderTest {
 	}
 
 
+
+
+	@Test
+	void propertyKeyNavigationSwitchedOff() throws Exception {
+		projectFile("src/main/resources/application.properties", "some.prop=5");
+		harness.changeConfiguration(Map.of("boot-java", Map.of("disabled-features", List.of("property-key-navigation"))));
+		try {
+			Editor editor = harness.newEditor(LanguageId.JAVA, """
+					package org.test;
+
+					import org.springframework.beans.factory.annotation.Value;
+
+					public class TestValueCompletion {
+
+						@Value("${some.prop}")
+						private String value1;
+					}""");
+
+			editor.assertNoDefinitionLinkTargets("some.prop");
+		}
+		finally {
+			harness.changeConfiguration(Map.of());
+		}
+	}
 
 }

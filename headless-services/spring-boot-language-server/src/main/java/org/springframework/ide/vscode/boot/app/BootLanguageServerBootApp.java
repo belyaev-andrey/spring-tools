@@ -439,15 +439,15 @@ public class BootLanguageServerBootApp {
 	}
 	
 	@Bean
-	JavaDefinitionHandler javaDefinitionHandler(SimpleLanguageServer server, CompilationUnitCache cuCache, JavaProjectFinder projectFinder, SpringMetamodelIndex springIndex, JdtDataQuerySemanticTokensProvider qurySemanticTokens) {
+	JavaDefinitionHandler javaDefinitionHandler(SimpleLanguageServer server, CompilationUnitCache cuCache, JavaProjectFinder projectFinder, SpringMetamodelIndex springIndex, JdtDataQuerySemanticTokensProvider qurySemanticTokens, BootJavaConfig config) {
 		return new JavaDefinitionHandler(cuCache, projectFinder, List.of(
-				new ValueDefinitionProvider(),
+				new ValueDefinitionProvider().onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.PROPERTY_KEY_NAVIGATION)),
 				new ConditionalOnResourceDefinitionProvider(),
-				new BeanNameDefinitionProvider(springIndex, Set.of(Annotations.DEPENDS_ON)),
+				new BeanNameDefinitionProvider(springIndex, Set.of(Annotations.DEPENDS_ON)).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_NAVIGATION)),
 				new ConditionalOnBeanDefinitionProvider(springIndex),
-				new BeanNameDefinitionProvider(springIndex, Set.of(Annotations.RESOURCE_JAVAX, Annotations.RESOURCE_JAKARTA)),
-				new BeanNameDefinitionProvider(springIndex, Set.of(Annotations.QUALIFIER)),
-				new NamedDefinitionProvider(springIndex),
+				new BeanNameDefinitionProvider(springIndex, Set.of(Annotations.RESOURCE_JAVAX, Annotations.RESOURCE_JAKARTA)).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_NAVIGATION)),
+				new BeanNameDefinitionProvider(springIndex, Set.of(Annotations.QUALIFIER)).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_NAVIGATION)),
+				new NamedDefinitionProvider(springIndex).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_NAVIGATION)),
 				new DataQueryParameterDefinitionProvider(server.getTextDocumentService(), qurySemanticTokens),
 				new SpelDefinitionProvider(springIndex, cuCache)
 			),

@@ -16,6 +16,7 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Location;
@@ -90,6 +91,17 @@ public class DependsOnCompletionProviderTest {
 	@Test
 	public void testDependsOnCompletionWithoutQuotesWithoutPrefix() throws Exception {
 		assertCompletions("@DependsOn(<*>)", 2, "@DependsOn(\"bean1\"<*>)");
+	}
+
+	@Test
+	public void testBeanNameCompletionSwitchedOff() throws Exception {
+		harness.changeConfiguration(Map.of("boot-java", Map.of("disabled-features", List.of("bean-name-completion"))));
+		try {
+			assertCompletions("@DependsOn(<*>)", 0, null);
+		}
+		finally {
+			harness.changeConfiguration(Map.of());
+		}
 	}
 
 	@Test

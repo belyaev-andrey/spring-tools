@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.junit.jupiter.api.Test;
@@ -133,6 +134,25 @@ public class ConvertQueryToTextBlockCodeActionProviderTest {
 
 		List<CodeAction> codeActions = withTitle(editor.getCodeActions("findUserByUsername", 1));
 		assertEquals(0, codeActions.size());
+	}
+
+
+	@Test
+	void noConversionWhenSwitchedOff() throws Exception {
+		IJavaProject testProject = useProject("aot-data-repositories-jpa");
+		harness.changeConfiguration(Map.of("boot-java", Map.of("disabled-features", List.of("query-text-block-conversion"))));
+		try {
+			Path filePath = Paths.get(testProject.getLocationUri())
+					.resolve("src/main/java/example/springdata/aot/UserRepository.java");
+			Editor editor = harness.newEditor(LanguageId.JAVA,
+					new String(Files.readAllBytes(filePath), StandardCharsets.UTF_8), filePath.toUri().toASCIIString());
+
+			List<CodeAction> codeActions = withTitle(editor.getCodeActions("SELECT u FROM example.springdata.aot.User u", 1));
+			assertEquals(0, codeActions.size());
+		}
+		finally {
+			harness.changeConfiguration(Map.of());
+		}
 	}
 
 }

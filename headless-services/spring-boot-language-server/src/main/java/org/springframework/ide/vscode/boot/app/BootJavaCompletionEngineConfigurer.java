@@ -122,7 +122,7 @@ public class BootJavaCompletionEngineConfigurer {
 		
 		Map<String, CompletionProvider> providers = new HashMap<>();
 		
-		providers.put(Annotations.VALUE, new ValueCompletionProcessor(javaProjectFinder, indexProvider, adHocProperties));
+		providers.put(Annotations.VALUE, new ValueCompletionProcessor(javaProjectFinder, indexProvider, adHocProperties, () -> config.isFeatureEnabled(DisableableFeature.VALUE_PROPERTY_COMPLETION)));
 		providers.put(Annotations.CONTEXT_CONFIGURATION, new ContextConfigurationProcessor(javaProjectFinder));
 		providers.put(Annotations.REPOSITORY, new DataRepositoryCompletionProcessor());
 		
@@ -130,42 +130,42 @@ public class BootJavaCompletionEngineConfigurer {
 				"resources", new ConditionalOnResourceCompletionProcessor())));
 
 		providers.put(Annotations.CONDITIONAL_ON_PROPERTY, new AnnotationAttributeCompletionProcessor(javaProjectFinder, Map.of(
-				"value", new ConditionalOnPropertyCompletionProcessor(indexProvider, adHocProperties, ConditionalOnPropertyCompletionProcessor.Mode.PROPERTY),
-				"name", new ConditionalOnPropertyCompletionProcessor(indexProvider, adHocProperties, ConditionalOnPropertyCompletionProcessor.Mode.PROPERTY),
-				"prefix", new ConditionalOnPropertyCompletionProcessor(indexProvider, adHocProperties, ConditionalOnPropertyCompletionProcessor.Mode.PREFIX))));
+				"value", new ConditionalOnPropertyCompletionProcessor(indexProvider, adHocProperties, ConditionalOnPropertyCompletionProcessor.Mode.PROPERTY).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.CONDITIONAL_ON_PROPERTY_COMPLETION)),
+				"name", new ConditionalOnPropertyCompletionProcessor(indexProvider, adHocProperties, ConditionalOnPropertyCompletionProcessor.Mode.PROPERTY).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.CONDITIONAL_ON_PROPERTY_COMPLETION)),
+				"prefix", new ConditionalOnPropertyCompletionProcessor(indexProvider, adHocProperties, ConditionalOnPropertyCompletionProcessor.Mode.PREFIX).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.CONDITIONAL_ON_PROPERTY_COMPLETION)))));
 
 		providers.put(Annotations.SCOPE, new AnnotationAttributeCompletionProcessor(javaProjectFinder, Map.of(
-				"value", new ScopeCompletionProcessor())));
+				"value", new ScopeCompletionProcessor().onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.SCOPE_COMPLETION)))));
 
 		providers.put(Annotations.DEPENDS_ON, new AnnotationAttributeCompletionProcessor(javaProjectFinder, Map.of(
-				"value", new DependsOnCompletionProcessor(springIndex))));
+				"value", new DependsOnCompletionProcessor(springIndex).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_COMPLETION)))));
 
 		providers.put(Annotations.CONDITIONAL_ON_BEAN, new AnnotationAttributeCompletionProcessor(javaProjectFinder, Map.of(
-				"name", new BeanNamesCompletionProcessor(springIndex),
+				"name", new BeanNamesCompletionProcessor(springIndex).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_COMPLETION)),
 				"type", new BeanTypesCompletionProcessor(springIndex))));
 
 		providers.put(Annotations.CONDITIONAL_ON_MISSING_BEAN, new AnnotationAttributeCompletionProcessor(javaProjectFinder, Map.of(
-				"name", new BeanNamesCompletionProcessor(springIndex),
+				"name", new BeanNamesCompletionProcessor(springIndex).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_COMPLETION)),
 				"type", new BeanTypesCompletionProcessor(springIndex),
 				"ignoredType", new BeanTypesCompletionProcessor(springIndex))));
 
 		providers.put(Annotations.QUALIFIER, new AnnotationAttributeCompletionProcessor(javaProjectFinder, Map.of(
-				"value", new QualifierCompletionProvider(springIndex))));
+				"value", new QualifierCompletionProvider(springIndex).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_COMPLETION)))));
 		
 		providers.put(Annotations.PROFILE, new AnnotationAttributeCompletionProcessor(javaProjectFinder, Map.of(
-				"value", new ProfileCompletionProvider(springIndex))));
+				"value", new ProfileCompletionProvider(springIndex).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.PROFILE_COMPLETION)))));
 		
 		providers.put(Annotations.RESOURCE_JAVAX, new AnnotationAttributeCompletionProcessor(javaProjectFinder, Map.of(
-				"name", new ResourceCompletionProvider(springIndex))));
+				"name", new ResourceCompletionProvider(springIndex).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_COMPLETION)))));
 		
 		providers.put(Annotations.RESOURCE_JAKARTA, new AnnotationAttributeCompletionProcessor(javaProjectFinder, Map.of(
-				"name", new ResourceCompletionProvider(springIndex))));
+				"name", new ResourceCompletionProvider(springIndex).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_COMPLETION)))));
 
 		providers.put(Annotations.NAMED_JAKARTA, new AnnotationAttributeCompletionProcessor(javaProjectFinder, Map.of(
-				"value", new NamedCompletionProvider(springIndex))));
+				"value", new NamedCompletionProvider(springIndex).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_COMPLETION)))));
 		
 		providers.put(Annotations.NAMED_JAVAX, new AnnotationAttributeCompletionProcessor(javaProjectFinder, Map.of(
-				"value", new NamedCompletionProvider(springIndex))));
+				"value", new NamedCompletionProvider(springIndex).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_COMPLETION)))));
 		
 		providers.put(Annotations.SCHEDULED, new AnnotationAttributeCompletionProcessor(javaProjectFinder, Map.of(
 				"cron", new CronExpressionCompletionProvider())));

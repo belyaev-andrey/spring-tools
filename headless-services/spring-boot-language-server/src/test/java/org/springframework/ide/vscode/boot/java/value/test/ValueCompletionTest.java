@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2025 Pivotal, Inc.
+ * Copyright (c) 2017, 2026 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.lsp4j.CompletionItem;
@@ -167,6 +168,24 @@ public class ValueCompletionTest {
         		"@Value(\"classpath:a-random-resource-root.md\"<*>)",
         		"@Value(\"classpath:org/random-resource-org.md\"<*>)",
         		"@Value(\"classpath:org/test/random-resource-org-test.txt\"<*>)");
+    }
+
+    @Test
+    void testPropertyKeyCompletionSwitchedOff() throws Exception {
+        harness.changeConfiguration(Map.of("boot-java", Map.of("disabled-features", List.of("value-property-completion"))));
+        try {
+            prepareCase("@Value(\"onField\")", "@Value(<*>)");
+
+            assertPropertyCompletions();
+
+            assertClasspathCompletions(
+                    "@Value(\"classpath:a-random-resource-root.md\"<*>)",
+                    "@Value(\"classpath:org/random-resource-org.md\"<*>)",
+                    "@Value(\"classpath:org/test/random-resource-org-test.txt\"<*>)");
+        }
+        finally {
+            harness.changeConfiguration(Map.of());
+        }
     }
 
     @Test

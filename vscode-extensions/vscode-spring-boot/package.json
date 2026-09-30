@@ -551,6 +551,37 @@
             "default": true,
             "description": "Inject Bean completion proposals in Java editor"
           },
+          "boot-java.disabled-features": {
+            "type": "array",
+            "default": [],
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "value-property-completion",
+                "property-key-navigation",
+                "bean-name-navigation",
+                "bean-name-completion",
+                "profile-completion",
+                "conditional-on-property-completion",
+                "scope-completion",
+                "ignored-problem-fixes",
+                "query-text-block-conversion"
+              ],
+              "enumDescriptions": [
+                "Property key proposals in @Value (classpath: proposals stay)",
+                "Go to definition and find references on property keys in @Value and @ConditionalOnProperty",
+                "Go to definition and find references on bean names in @DependsOn, @Qualifier, @Resource and @Named",
+                "Bean name proposals in @DependsOn, @Qualifier, @Resource, @Named and @ConditionalOn(Missing)Bean",
+                "Profile proposals in @Profile",
+                "Property key proposals in @ConditionalOnProperty",
+                "Scope proposals in @Scope",
+                "The quick fixes of problems set to IGNORE, offered as refactorings",
+                "'Convert query to text block' on query strings"
+              ]
+            },
+            "markdownDescription": "Java editor features to turn off, for example when another Java tooling provides them too. The features not listed stay on."
+          },
           "boot-java.java.beans-structure-tree": {
             "type": "boolean",
             "default": true,

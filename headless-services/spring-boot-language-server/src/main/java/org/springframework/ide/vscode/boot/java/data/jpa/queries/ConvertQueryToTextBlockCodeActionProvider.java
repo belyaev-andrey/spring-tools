@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
+import org.springframework.ide.vscode.boot.app.BootJavaConfig;
+import org.springframework.ide.vscode.boot.app.DisableableFeature;
 import org.springframework.ide.vscode.boot.java.annotations.AnnotationHierarchies;
 import org.springframework.ide.vscode.boot.java.codeaction.JdtAstCodeActionProvider;
 import org.springframework.ide.vscode.boot.java.data.jpa.queries.JdtQueryVisitorUtils.EmbeddedQueryExpression;
@@ -52,13 +54,18 @@ public class ConvertQueryToTextBlockCodeActionProvider implements JdtAstCodeActi
 	public static final String TITLE = "Convert query to text block";
 
 	private final JdtRefactorings refactorings;
+	private final BootJavaConfig config;
 
-	public ConvertQueryToTextBlockCodeActionProvider(JdtRefactorings refactorings) {
+	public ConvertQueryToTextBlockCodeActionProvider(JdtRefactorings refactorings, BootJavaConfig config) {
 		this.refactorings = refactorings;
+		this.config = config;
 	}
 
 	@Override
 	public boolean isApplicable(IJavaProject project) {
+		if (!config.isFeatureEnabled(DisableableFeature.QUERY_TEXT_BLOCK_CONVERSION)) {
+			return false;
+		}
 		return SpringProjectUtil.hasDependencyStartingWith(project, "spring-data-jpa", null)
 				|| SpringProjectUtil.hasDependencyStartingWith(project, "spring-data-jdbc", null);
 	}

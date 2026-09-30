@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.LocationLink;
@@ -187,6 +188,30 @@ public class DependsOnDefinitionProviderTest {
 				null);
 
 		editor.assertDefinitionLinkTargets("bean1", List.of(expectedLocation1, expectedLocation2));
+	}
+
+
+	@Test
+	public void testBeanNameNavigationSwitchedOff() throws Exception {
+		String tempJavaDocUri = directory.toPath().resolve("src/main/java/org/test/TempClass.java").toUri().toString();
+		harness.changeConfiguration(Map.of("boot-java", Map.of("disabled-features", List.of("bean-name-navigation"))));
+		try {
+			Editor editor = harness.newEditor(LanguageId.JAVA, """
+					package org.test;
+
+					import org.springframework.stereotype.Component;
+					import org.springframework.context.annotation.DependsOn;
+
+					@Component
+					@DependsOn("bean1")
+					public class TestDependsOnClass {
+					}""", tempJavaDocUri);
+
+			editor.assertNoDefinitionLinkTargets("bean1");
+		}
+		finally {
+			harness.changeConfiguration(Map.of());
+		}
 	}
 
 }

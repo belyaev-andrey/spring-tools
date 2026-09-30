@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.ide.vscode.boot.app.BootJavaConfig;
+import org.springframework.ide.vscode.boot.app.DisableableFeature;
 import org.springframework.ide.vscode.boot.app.BootLanguageServerParams;
 import org.springframework.ide.vscode.boot.app.SpringSymbolIndex;
 import org.springframework.ide.vscode.boot.index.SpringMetamodelIndex;
@@ -150,7 +151,7 @@ public class BootJavaLanguageServerComponents implements LanguageServerComponent
 		this.codeActionProvider = appContext.getBean(BootJavaCodeActionProvider.class);
 
 
-		ReferencesHandler referencesHandler = createReferenceHandler(server, projectFinder, springIndex, springSymbolIndex, cuCache);
+		ReferencesHandler referencesHandler = createReferenceHandler(server, projectFinder, springIndex, springSymbolIndex, cuCache, config);
 		documents.onReferences(referencesHandler);
 		
 		//
@@ -294,15 +295,15 @@ public class BootJavaLanguageServerComponents implements LanguageServerComponent
 	}
 
 	protected ReferencesHandler createReferenceHandler(SimpleLanguageServer server, JavaProjectFinder projectFinder,
-			SpringMetamodelIndex index, SpringSymbolIndex symbolIndex, CompilationUnitCache cuCache) {
+			SpringMetamodelIndex index, SpringSymbolIndex symbolIndex, CompilationUnitCache cuCache, BootJavaConfig config) {
 		
 		Map<String, ReferenceProvider> specificProviders = new HashMap<>();
 
-		specificProviders.put(Annotations.VALUE, new ValuePropertyReferencesProvider(projectFinder, index));
-		specificProviders.put(Annotations.CONDITIONAL_ON_PROPERTY, new ValuePropertyReferencesProvider(projectFinder, index));
-		specificProviders.put(Annotations.QUALIFIER, new QualifierReferencesProvider(index));
-		specificProviders.put(Annotations.NAMED_JAKARTA, new NamedReferencesProvider(index));
-		specificProviders.put(Annotations.NAMED_JAVAX, new NamedReferencesProvider(index));
+		specificProviders.put(Annotations.VALUE, new ValuePropertyReferencesProvider(projectFinder, index).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.PROPERTY_KEY_NAVIGATION)));
+		specificProviders.put(Annotations.CONDITIONAL_ON_PROPERTY, new ValuePropertyReferencesProvider(projectFinder, index).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.PROPERTY_KEY_NAVIGATION)));
+		specificProviders.put(Annotations.QUALIFIER, new QualifierReferencesProvider(index).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_NAVIGATION)));
+		specificProviders.put(Annotations.NAMED_JAKARTA, new NamedReferencesProvider(index).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_NAVIGATION)));
+		specificProviders.put(Annotations.NAMED_JAVAX, new NamedReferencesProvider(index).onlyWhen(() -> config.isFeatureEnabled(DisableableFeature.BEAN_NAME_NAVIGATION)));
 		specificProviders.put(Annotations.PROFILE, new ProfileReferencesProvider(index));
 		
 		List<ReferenceProvider> unspecificProviders = new ArrayList<>();
