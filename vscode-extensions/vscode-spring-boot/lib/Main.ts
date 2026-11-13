@@ -26,6 +26,7 @@ import { activateCopilotFeatures, registerQueryExplainCommand } from "./copilot"
 import { StructureManager } from "./explorer/structure-tree-manager";
 import { ExplorerTreeProvider } from "./explorer/explorer-tree-provider";
 import { JavaToolingDescriptor, JavaToolingManager } from "./java-tooling";
+import { registerBuildCommands } from "./aot-build";
 
 const PROPERTIES_LANGUAGE_ID = "spring-boot-properties";
 const YAML_LANGUAGE_ID = "spring-boot-properties-yaml";
@@ -211,6 +212,7 @@ export async function activate(context: ExtensionContext): Promise<ExtensionAPI>
     setLogLevelUi.activate(client, options, context);
     startPropertiesConversionSupport(context);
     registerMiscCommands(context);
+    registerBuildCommands(context);
 
 	// Register content loader for URIs of type `spring-boot-ls:...` (load JAR content via Boot LS)
     context.subscriptions.push(workspace.registerTextDocumentContentProvider('spring-boot-ls', new (class implements TextDocumentContentProvider {
